@@ -24,7 +24,8 @@ class TableSimple extends React.Component<TableSimpleProps, TableSimpleState> {
         super(props, context);
         this.state = { data: [],
                        filterText: '',
-                       rowSelects: []};
+                       rowSelects: [],
+                       editText: ''};
     }
 
    public componentDidUpdate(prevProps: any, prevState: TableSimpleState): void {
@@ -50,19 +51,35 @@ class TableSimple extends React.Component<TableSimpleProps, TableSimpleState> {
      this.setState(old=>({ filterText }));
   };
 
+  public  handleUserInputEdit(e: any): void {
+    const editTextVal: string = e.target.value;
+    const key = e.target.name;
+    const editTexObj = {};
+    editTexObj[key] = editTextVal;
+    const editTextNew = Object.assign(this.state.editText, editTexObj);
+    this.setState(old=>({ editText: editTextNew}));
+  };
+
   public onRowSelectHandle(e: any, it: string) {
     e.preventDefault();
-    const rowsSelect = this.state.rowSelects;
-    const idx = rowsSelect.indexOf(it);
-    if (idx >= 0) {
-      rowsSelect.splice(idx, 1)
-    } else {
-      rowsSelect.push(it)
+    if (e.target && e.target.key && !e.target.key.endsWith('actions') ) {
+      const rowsSelect = this.state.rowSelects;
+      const idx = rowsSelect.indexOf(it);
+      if (idx >= 0) {
+        rowsSelect.splice(idx, 1)
+      } else {
+        rowsSelect.push(it)
+      }
+      ;
+      this.setState(old=>({ rowSelects:  rowsSelect}));
     }
-    ;
-    this.setState(old=>({ rowSelects:  rowsSelect}));
   }
 
+  public handleEditText(e: any, rowName: string) {
+    const editTextHelp = this.state.editText;
+    delete editTextHelp[rowName];
+    this.setState(old=>({ editText:  editTextHelp}));
+  }
 
     public render() {
      let results: Row[] = this.state.data ? this.state.data : this.props.rows;
@@ -85,7 +102,7 @@ class TableSimple extends React.Component<TableSimpleProps, TableSimpleState> {
               {keysColumn.map((it: string, idx: number) => {
                 return (<React.Fragment key={idx}>
                   <th  onClick={(e) => this.onSort(e,it)}>
-                    it
+                    {it}
                   </th>
                 </React.Fragment>)
               })
@@ -117,18 +134,24 @@ class TableSimple extends React.Component<TableSimpleProps, TableSimpleState> {
 
     public renderRows = (results: Row[]) => {
       const rowsData: Row[] = results;
+      console.log(this.state.editText!== ''? this.state.editText  : 'index');
         return rowsData.map((row: Row, index: number) => {
             return (
                 <tr key={`${index}${row.name}`}
-                    onClick={(e) => this.onRowSelectHandle(e, `${index}${row.name}`)}
-                    style={{backgroundColor: this.state.rowSelects.indexOf(`${index}${row.name}`) >=0 ? 'red' : 'inherit'}}>
-                    <td>{ index }</td>
+                    onClick={(e) => this.onRowSelectHandle(e, `${row.name}`)}
+                    style={{backgroundColor: this.state.rowSelects.indexOf(`${row.name}`) >=0 ? 'red' : 'inherit'}}>
+                    <td >{ row.editable ? ( <DebounceInput type='text'
+                                                          name={`${index}${row.name}id`}
+                                                          value={this.state.editText!== ''? this.state.editText[`${row.name}id`] : `${index}`}
+                                                          onChange={(e) => this.handleUserInputEdit(e)}/>) : row.saveAttr ? this.state.editText[`${row.name}id`] : index }
+
+                    </td>
                     <td>{ row.name }</td>
                     <td>{ row.description}</td>
                     <td>{ row.someData}</td>
-                    <td>
-                        <RowEditButton id={row.id}/>
-                        <RowCloseButton id={row.id}/>
+                    <td key={`${index}${row.name}actions`}>
+                        <RowEditButton id={row.id} saveAttr={row.editable}/>
+                        <RowCloseButton id={row.id} rowName = {`${row.name}`} handleEditText={this.handleEditText}/>
                     </td>
                 </tr>
             );

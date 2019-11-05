@@ -1,4 +1,6 @@
 export interface RowCloseButtonProps {
     id: number;
-    onRemoveRow: any
+    onRemoveRow: any,
+  handleEditText: any;
+    rowName: string;
 }

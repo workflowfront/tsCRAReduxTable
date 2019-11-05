@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {RowEditButtonProps} from "./types/RowEditButtonProps";
 import {connect} from "react-redux";
-import {deleteRow} from "../../store/actions/row-actions";
+import {editRow} from "../../store/actions/row-actions";
 import {Button} from "react-bootstrap";
 
 class RowEditButton extends React.Component<RowEditButtonProps, {}> {
@@ -17,17 +17,17 @@ class RowEditButton extends React.Component<RowEditButtonProps, {}> {
 
     public render() {
         return (
-            <Button bsStyle="warning" onClick={this.handleClick}>edit</Button>
+            <Button bsStyle="warning" onClick={this.handleClick}>{this.props.saveAttr ? 'save' : 'edit'}</Button>
         )
     };
 
     public onEditRow = () => {
-        this.props.onEditRow(this.props.id);
+        this.props.onEditRow(this.props.id, this.props.saveAttr);
     }
 }
 
 const mapActionsToProps = {
-    onEditRow: deleteRow
+    onEditRow: editRow
 };
 
 export default connect(undefined, mapActionsToProps)(RowEditButton);

@@ -1,4 +1,5 @@
 export interface RowEditButtonProps {
     id: number;
-    onEditRow: any
+    onEditRow: any;
+    saveAttr: false | boolean;
 }

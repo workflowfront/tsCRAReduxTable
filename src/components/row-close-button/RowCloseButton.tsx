@@ -12,6 +12,7 @@ class RowCloseButton extends React.Component<RowCloseButtonProps, {}> {
 
     public handleClick = () => {
         console.log('получили id: ', this.props.id);
+        this.props.handleEditText(this.props.rowName);
         this.onRemoveRow();
     }
 
