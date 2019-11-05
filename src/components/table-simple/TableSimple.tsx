@@ -23,7 +23,8 @@ class TableSimple extends React.Component<TableSimpleProps, TableSimpleState> {
     constructor(props: TableSimpleProps, context: any) {
         super(props, context);
         this.state = { data: [],
-                       filterText: ''};
+                       filterText: '',
+                       rowSelects: []};
     }
 
    public componentDidUpdate(prevProps: any, prevState: TableSimpleState): void {
@@ -49,6 +50,20 @@ class TableSimple extends React.Component<TableSimpleProps, TableSimpleState> {
      this.setState(old=>({ filterText }));
   };
 
+  public onRowSelectHandle(e: any, it: string) {
+    e.preventDefault();
+    const rowsSelect = this.state.rowSelects;
+    const idx = rowsSelect.indexOf(it);
+    if (idx >= 0) {
+      rowsSelect.splice(idx, 1)
+    } else {
+      rowsSelect.push(it)
+    }
+    ;
+    this.setState(old=>({ rowSelects:  rowsSelect}));
+  }
+
+
     public render() {
      let results: Row[] = this.state.data ? this.state.data : this.props.rows;
       const filterObj = this.state.filterText;
@@ -60,51 +75,53 @@ class TableSimple extends React.Component<TableSimpleProps, TableSimpleState> {
             }
           });
         }
-      }
-      console.log('res', results);
-        return (
-            <Grid>
-                <Table striped={true} bordered={true} hover={true}>
-                    <thead>
-                      <tr>
-                         {keysColumn.map((it: string, idx: number) => {
-                           return (<React.Fragment key={idx}>
-                                     <th  onClick={(e) => this.onSort(e,it)}>
-                                       it
-                                     </th>
-                                   </React.Fragment>)
-                           })
-                         }
-                         <th>Действия</th>
-                        </tr>
-                        <tr>
-                          {keysColumn.map((it: string, idx: number) => {
-                            return (<React.Fragment key={idx}>
-                              <th  key={idx}>
-                                <DebounceInput type='text'
-                                               name={it}
-                                               value={this.state.filterText!== ''? this.state.filterText[it] :''}
-                                               onChange={(e) => this.handleUserInput(e)}/>
-                              </th>
-                            </React.Fragment>)
-                            })
-                          }
-                          <th>{null}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        { this.renderRows(results) }
-                    </tbody>
-                </Table>
-            </Grid>
-        )
+      };
+
+      return (
+        <Grid>
+          <Table striped={true} bordered={true} hover={true}>
+            <thead>
+            <tr>
+              {keysColumn.map((it: string, idx: number) => {
+                return (<React.Fragment key={idx}>
+                  <th  onClick={(e) => this.onSort(e,it)}>
+                    it
+                  </th>
+                </React.Fragment>)
+              })
+              }
+              <th>Действия</th>
+            </tr>
+            <tr>
+              {keysColumn.map((it: string, idx: number) => {
+                return (<React.Fragment key={idx}>
+                  <th  key={idx}>
+                    <DebounceInput type='text'
+                                   name={it}
+                                   value={this.state.filterText!== ''? this.state.filterText[it] :''}
+                                   onChange={(e) => this.handleUserInput(e)}/>
+                  </th>
+                </React.Fragment>)
+              })
+              }
+              <th>{null}</th>
+            </tr>
+            </thead>
+            <tbody>
+            { this.renderRows(results) }
+            </tbody>
+          </Table>
+        </Grid>
+      )
     };
 
     public renderRows = (results: Row[]) => {
       const rowsData: Row[] = results;
         return rowsData.map((row: Row, index: number) => {
             return (
-                <tr key={`${index}${row.name}`}>
+                <tr key={`${index}${row.name}`}
+                    onClick={(e) => this.onRowSelectHandle(e, `${index}${row.name}`)}
+                    style={{backgroundColor: this.state.rowSelects.indexOf(`${index}${row.name}`) >=0 ? 'red' : 'inherit'}}>
                     <td>{ index }</td>
                     <td>{ row.name }</td>
                     <td>{ row.description}</td>
